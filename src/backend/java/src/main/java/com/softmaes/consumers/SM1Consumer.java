@@ -17,7 +17,7 @@ public class SM1Consumer {
     // attributes
 
     public Properties properties;
-    public KafkaConsumer<Integer, String> kafkaConsumer;
+    public KafkaConsumer<String, String> kafkaConsumer;
 
     public String groupId;
     public String serverHost;
@@ -48,7 +48,7 @@ public class SM1Consumer {
         this.properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.serverHost);
         this.properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         this.properties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
-        this.properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.IntegerDeserializer");
+        this.properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         this.properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
     }
 
@@ -56,7 +56,7 @@ public class SM1Consumer {
      * initialize the kafka consumer
      */
     public void initKafkaConsumer(){
-        this.kafkaConsumer = new KafkaConsumer<Integer, String>(this.properties);
+        this.kafkaConsumer = new KafkaConsumer<String, String>(this.properties);
         this.kafkaConsumer.subscribe(Collections.singletonList("maes-topic-one"));
     }
     
@@ -65,7 +65,11 @@ public class SM1Consumer {
      */
     public void streamConsumer(){
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(()->{
-             System.out.println("test");
+             System.out.println("----------------------------- " + i);
+             ConsumerRecords<String, String> consumerRecords = this.kafkaConsumer.poll(Duration.ofMillis(10)); // si 1000 sont produit par second on en recupere 10
+             consumerRecords.forEach(cr -> {
+                System.out.println("{\tkey => " + cr.key() + ", " + cr.value() + " => " + cr.offset() + "\t}\n");
+             });
         }, 1000, 1000, TimeUnit.MILLISECONDS);
     }
     
