@@ -1,0 +1,24 @@
+version: '3.3'
+
+services:
+
+      
+        
+  # ===================
+  #    java BACKEND 
+  # ===================
+
+  big-data-training-java-kafka-backend:
+    image: big-data-training-java-kafka-backend
+    build:
+      context: ../../src/backend/java
+      dockerfile: ./Dockerfile
+    ports:
+      - "8088:8088"
+    networks:
+      - big-data-training-java-kafka
+
+networks:
+  big-data-training-java-kafka:
+    driver: bridge
+  
