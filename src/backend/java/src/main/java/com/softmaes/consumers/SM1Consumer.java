@@ -1,8 +1,8 @@
 package com.softmaes.consumers;
 
-import org.apache.kafka.clients.consumer.*;
-// import org.apache.kafka.clients.consumer.ConsumerRecords;
-// import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.util.Collections;
 import java.util.concurrent.Executors;
@@ -65,7 +65,7 @@ public class SM1Consumer {
      */
     public void streamConsumer(){
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(()->{
-             System.out.println("----------------------------- " + i);
+             System.out.println("----------------------------- ");
              ConsumerRecords<String, String> consumerRecords = this.kafkaConsumer.poll(Duration.ofMillis(10)); // si 1000 sont produit par second on en recupere 10
              consumerRecords.forEach(cr -> {
                 System.out.println("{\tkey => " + cr.key() + ", " + cr.value() + " => " + cr.offset() + "\t}\n");
