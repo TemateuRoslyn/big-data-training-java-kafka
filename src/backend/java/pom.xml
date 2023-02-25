@@ -9,21 +9,18 @@
   <version>1.0-SNAPSHOT</version>
 
   <name>big-data-training-java-kafka</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
 
   <properties>
-
-    <java.version>1.8</java.version>
     <packaging>jar</packaging>
+    <avro.version>1.8.2</avro.version>
+    <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
-
-    <kafka.version>3.3.1</kafka.version>
+    <scala.version>2.12.10</scala.version>    
+    <kafka.version>3.3.1</kafka.version>   
     <app.mainClass>com.softmaes.BigDataTrainingJavaApplication</app.mainClass>
-
   </properties>
+
+
 
   <dependencies>
 
@@ -35,50 +32,179 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka -->
     <dependency>
-        <groupId>org.apache.kafka</groupId>
-        <artifactId>kafka_2.13</artifactId>
-        <version>${kafka.version}</version>
-    </dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro-maven-plugin</artifactId>
+            <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <!-- This version must be compatible with the Scala version of the Kafka dependency. -->
+            <version>${scala.version}</version>
+        </dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
-    <dependency>
-        <groupId>org.apache.kafka</groupId>
-        <artifactId>kafka-clients</artifactId>
-        <version>${kafka.version}</version>
-    </dependency>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-streams -->
-    <dependency>
-        <groupId>org.apache.kafka</groupId>
-        <artifactId>kafka-streams</artifactId>
-        <version>${kafka.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>com.101tec</groupId>
+            <artifactId>zkclient</artifactId>
+            <version>0.9</version>
+        </dependency>
+        
 
   </dependencies>
 
   <build>
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
-      <plugins>
-        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+        <pluginManagement>
+                  <plugins>
+                      <plugin>
+                          <groupId>net.alchim31.maven</groupId>
+                          <artifactId>scala-maven-plugin</artifactId>
+                          <version>3.2.1</version>
+                          <configuration>
+                              <scalaCompatVersion>${kafka.scala.version}</scalaCompatVersion>
+                              <scalaVersion>${scala.version}</scalaVersion>
+                          </configuration>
+                      </plugin>
+                  </plugins>
+        </pluginManagement>
+
+       <plugins>
+
+       <!-- See http://davidb.github.io/scala-maven-plugin/usage.html -->
         <plugin>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>3.1.0</version>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <version>3.2.1</version>
+            <configuration>
+                <args>
+                    <!--
+                        In combination with Scala 2.11, `-Xexperimental` enables SAM
+                        for Java 8 lambda support.  Make sure `kafka.scala.version`
+                        is set to `2.11`, not `2.10`.
+                    -->
+                    <arg>-Xexperimental</arg>
+                    <!-- Emit warning and location for usages of features that should be imported explicitly. -->
+                    <arg>-feature</arg>
+                    <!-- Emit warning and location for usages of deprecated APIs. -->
+                    <arg>-deprecation</arg>
+                    <!-- Enable additional warnings where generated code depends on assumptions. -->
+                    <arg>-unchecked</arg>
+                    <!-- Enable recommended additional warnings. -->
+                    <arg>-Xlint</arg>
+                    <!-- Warn if an argument list is modified to match the receiver. -->
+                    <arg>-Ywarn-adapted-args</arg>
+                    <arg>-Ywarn-dead-code</arg>
+                </args>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>compile</goal>
+                        <goal>testCompile</goal>
+                    </goals>
+                </execution>
+            </executions>
         </plugin>
-        <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+
+       <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.3</version>
+            <inherited>true</inherited>
+            <configuration>
+                <source>${java.version}</source>
+                <target>${java.version}</target>
+            </configuration>
+        </plugin>
+
         <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.0.2</version>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+                <descriptors>
+                    <descriptor>src/assembly/development.xml</descriptor>
+                    <descriptor>src/assembly/package.xml</descriptor>
+                    <descriptor>src/assembly/standalone.xml</descriptor>
+                </descriptors>
+                <archive>
+                    <manifest>
+                        <mainClass>${app.mainClass}</mainClass>
+                    </manifest>
+                </archive>
+                <attach>false</attach>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>make-assembly</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                </execution>
+            </executions>
         </plugin>
+
+
+
+          <!--
+            Add Scala sources and tests to project.
+            See http://www.mojohaus.org/build-helper-maven-plugin/usage.html
+          -->
+
+
         <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>1.10</version>
+            <executions>
+                <execution>
+                    <id>add-source</id>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>add-source</goal>
+                    </goals>
+                    <configuration>
+                        <sources>
+                            <source>src/main/scala</source>
+                            <source>${project.build.directory}/generated-sources</source>
+                        </sources>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>add-test-source</id>
+                    <phase>generate-test-sources</phase>
+                    <goals>
+                        <goal>add-test-source</goal>
+                    </goals>
+                    <configuration>
+                        <sources>
+                            <source>src/test/scala</source>
+                            <source>${project.build.directory}/generated-sources</source>
+                        </sources>
+                    </configuration>
+                </execution>
+            </executions>
         </plugin>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.1</version>
-        </plugin>
+
+
+          <!-- configure mainclass in the .jar -->
+
+
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.0.2</version>
@@ -110,24 +236,6 @@
                 </execution>
             </executions>
         </plugin>
-        <plugin>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
-        </plugin>
-        <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
-        <plugin>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>3.7.1</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.0.0</version>
-        </plugin>
       </plugins>
-    </pluginManagement>
   </build>
 </project>
