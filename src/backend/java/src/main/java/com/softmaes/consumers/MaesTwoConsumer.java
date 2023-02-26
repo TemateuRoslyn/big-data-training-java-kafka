@@ -3,6 +3,7 @@ package com.softmaes.consumers;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.util.Collections;
 import java.util.concurrent.Executors;
@@ -12,7 +13,7 @@ import java.util.Properties;
 import java.time.Duration;
 
 
-public class SM1Consumer {
+public class MaesTwoConsumer {
 
     // attributes
 
@@ -20,17 +21,17 @@ public class SM1Consumer {
     public KafkaConsumer<String, String> kafkaConsumer;
 
     public String groupId;
+    public String topic_name;
     public String serverHost;
 
 
     /**
      * No arguments constructor
      */
-    public SM1Consumer(String groupId, String serverHost){
-
-        System.out.println("================ apppel du consommateur ==========================");
+    public MaesTwoConsumer(String groupId, String serverHost, String topic_name){
 
         this.groupId = groupId;
+        this.topic_name = topic_name;
         this.serverHost = serverHost;
 
         this.initProperties();
@@ -46,12 +47,13 @@ public class SM1Consumer {
 
         this.properties = new Properties();
 
-        this.properties.put(ConsumerConfig.GROUP_ID_CONFIG, this.groupId);
         this.properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.serverHost);
         this.properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        this.properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        this.properties.put(ConsumerConfig.GROUP_ID_CONFIG, this.groupId);
         this.properties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
-        this.properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
-        this.properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+        this.properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        this.properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
     }
 
     /**
@@ -59,7 +61,7 @@ public class SM1Consumer {
      */
     public void initKafkaConsumer(){
         this.kafkaConsumer = new KafkaConsumer<String, String>(this.properties);
-        this.kafkaConsumer.subscribe(Collections.singletonList("maes-topic-one"));
+        this.kafkaConsumer.subscribe(Collections.singletonList(this.topic_name));
     }
     
     /**
@@ -69,9 +71,9 @@ public class SM1Consumer {
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(()->{
              ConsumerRecords<String, String> consumerRecords = this.kafkaConsumer.poll(Duration.ofMillis(10)); // si 1000 sont produit par second on en recupere 10
              consumerRecords.forEach(cr -> {
-                System.out.println("{\tkey => " + cr.key() + ", " + cr.value() + " => " + cr.offset() + "\t}\n");
+                System.out.println("Consumer Maes 2: Received message =>  {\t key => " + cr.key() + ", " + cr.value() + " => " + cr.offset() + "\t}");
              });
-        }, 1000, 1000, TimeUnit.MILLISECONDS);
+        }, 3000, 3000, TimeUnit.MILLISECONDS);
     }
     
 }

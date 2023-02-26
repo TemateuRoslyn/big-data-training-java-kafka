@@ -6,14 +6,9 @@
 # console command tools
 
 consumer-1.sh
+consumer-2.sh
+producer-1.sh
+producer-2.sh
 package-java-run.sh
 run-java-run.sh
 stop-docker.sh
-
-cd src/backend/java
-
-java -jar target/big-data-training-java-kafka-1.0-SNAPSHOT.jar
-
-cd ./deployment/docker
-
-docker-compose stop

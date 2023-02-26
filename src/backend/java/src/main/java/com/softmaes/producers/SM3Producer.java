@@ -13,7 +13,7 @@ import java.util.Random;
 
 import java.time.Duration;
 
-public class SM1Producer {
+public class SM3Producer {
         // attributes
 
         public Properties properties;
@@ -29,7 +29,7 @@ public class SM1Producer {
         /**
          * No arguments constructor
          */
-        public SM1Producer(String serverHost, String topic_name){
+        public SM3Producer(String serverHost, String topic_name){
     
             this.serverHost = serverHost;
             this.topic_name = topic_name;
@@ -49,7 +49,7 @@ public class SM1Producer {
             this.properties = new Properties();
     
             this.properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.serverHost);
-            this.properties.put(ProducerConfig.CLIENT_ID_CONFIG, "client-producer-1");
+            this.properties.put(ProducerConfig.CLIENT_ID_CONFIG, "client-producer-3");
             this.properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             this.properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         }
@@ -68,12 +68,12 @@ public class SM1Producer {
             Random random = new Random();
             Executors.newScheduledThreadPool(1).scheduleAtFixedRate(()->{
                 String key = String.valueOf(random.nextInt(1000));
-                String value = String.valueOf("from_prod_1" + "__" + (++this.message_no));
+                String value = String.valueOf("from_prod_3" + "__" + (++this.message_no));
 
                 this.producerRecord =new ProducerRecord<>(this.topic_name, key, value);
 
                 this.kafkaProducer.send(this.producerRecord, (metadata, ex) -> {
-                    System.out.println("Producer SM1: Sending message => " 
+                    System.out.println("Producer SM3: Sending message => " 
                     + value + ", Partition => " 
                     + metadata.partition()
                     + ", Offset => " + metadata.offset());
