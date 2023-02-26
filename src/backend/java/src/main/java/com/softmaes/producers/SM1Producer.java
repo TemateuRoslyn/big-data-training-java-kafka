@@ -65,7 +65,7 @@ public class SM1Producer {
                     System.out.println("Metadata: Sending message => " 
                     + value + ", Partition => " 
                     + metadata.partition()
-                    + " => " + metadata.offset());
+                    + ", Offset => " + metadata.offset());
                 });
             }, 1000, 1000, TimeUnit.MILLISECONDS);
         }

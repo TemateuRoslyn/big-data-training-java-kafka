@@ -1,3 +1,11 @@
 .metals
 .vscode/
 *.log
+
+
+# console command tools
+
+consumer-1.sh
+package-java-run.sh
+run-java-run.sh
+stop-docker.sh

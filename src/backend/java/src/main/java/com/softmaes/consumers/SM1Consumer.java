@@ -28,6 +28,8 @@ public class SM1Consumer {
      */
     public SM1Consumer(String groupId, String serverHost){
 
+        System.out.println("================ apppel du consommateur ==========================");
+
         this.groupId = groupId;
         this.serverHost = serverHost;
 
@@ -65,7 +67,6 @@ public class SM1Consumer {
      */
     public void streamConsumer(){
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(()->{
-             System.out.println("----------------------------- ");
              ConsumerRecords<String, String> consumerRecords = this.kafkaConsumer.poll(Duration.ofMillis(10)); // si 1000 sont produit par second on en recupere 10
              consumerRecords.forEach(cr -> {
                 System.out.println("{\tkey => " + cr.key() + ", " + cr.value() + " => " + cr.offset() + "\t}\n");
